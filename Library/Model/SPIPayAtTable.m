@@ -54,20 +54,21 @@
 
 - (SPIMessage *)toMessage:(NSString *)messageId {
     NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
-    [data setObject:[NSNumber numberWithInteger:BillRetrievalResultSuccess] forKey:@"success"];
+    BOOL success = _result == BillRetrievalResultSuccess;
+    [data setValue:[NSNumber numberWithBool:success] forKey:@"success"];
     if (_billId.length > 0) {
-        [data setObject:_billId forKey:@"bill_id"];
+        [data setValue:_billId forKey:@"bill_id"];
     }
     if (_tableId.length > 0) {
-        [data setObject:_tableId forKey:@"table_id"];
+        [data setValue:_tableId forKey:@"table_id"];
     }
     if (_result == BillRetrievalResultSuccess) {
-        [data setObject:@"bill_total_amount" forKey:[NSNumber numberWithInteger:_totalAmount]];
-        [data setObject:@"bill_outstanding_amount" forKey:[NSNumber numberWithInteger:_outstandingAmount]];
-        [data setObject:@"bill_payment_history" forKey:[self getBillPaymentHistory]];
+        [data setValue:[NSNumber numberWithInteger:_totalAmount] forKey:@"bill_total_amount"];
+        [data setValue:[NSNumber numberWithInteger:_outstandingAmount] forKey:@"bill_outstanding_amount"];
+        [data setObject:[self getBillPaymentHistory] forKey:@"bill_payment_history"];
     } else {
-        [data setObject:@"error_reason" forKey:[NSNumber numberWithInt:_result].stringValue];
-        [data setObject:@"error_detail" forKey:[NSNumber numberWithInt:_result].stringValue];
+        [data setValue:[NSNumber numberWithInt:_result].stringValue forKey:@"error_reason" ];
+        [data setValue:[NSNumber numberWithInt:_result].stringValue forKey:@"error_detail"];
     }
     
     return [[SPIMessage alloc] initWithMessageId:messageId eventName:SPIPayAtTableBillDetailsKey data:data needsEncryption:true];
@@ -155,9 +156,9 @@
     [data setValue:[NSNumber numberWithBool:_equalSplitEnabled] forKey:@"equal_split_enabled"];
     [data setValue:[NSNumber numberWithBool:_tippingEnabled] forKey:@"tipping_enabled"];
     [data setValue:[NSNumber numberWithBool:_summaryReportEnabled] forKey:@"summary_report_enabled"];
-    [data setValue:[NSNumber numberWithBool:_labelPayButton] forKey:@"pay_button_label"];
-    [data setValue:[NSNumber numberWithBool:_labelOperatorId] forKey:@"operator_id_label"];
-    [data setValue:[NSNumber numberWithBool:_labelTableId] forKey:@"table_id_label"];
+    [data setValue:[NSString stringWithFormat:@"%@", _labelPayButton] forKey:@"pay_button_label"];
+    [data setValue:[NSString stringWithFormat:@"%@",_labelOperatorId] forKey:@"operator_id_label"];
+    [data setValue:[NSString stringWithFormat:@"%@",_labelTableId] forKey:@"table_id_label"];
     [data setValue:_allowedOperatorIds forKey:@"operator_id_list"];
     
     return [[SPIMessage alloc] initWithMessageId:messageId eventName:SPIPayAtTableSetTableConfigKey data:data needsEncryption:true];
@@ -184,6 +185,17 @@
 
 - (instancetype)initWithClient:(SPIClient *)spi {
     _spi = spi;
+    _config = [SPIPayAtTableConfig alloc];
+    _config.operatorIdEnabled = true;
+    _config.allowedOperatorIds = [NSArray array];
+    _config.equalSplitEnabled = true;
+    _config.splitByAmountEnabled = true;
+    _config.summaryReportEnabled = true;
+    _config.tippingEnabled = true;
+    _config.labelOperatorId = @"Operator ID";
+    _config.labelPayButton = @"Pay at Table";
+    _config.labelTableId = @"Table Name";
+
     return self;
 }
 
@@ -230,7 +242,7 @@
     SPIPaymentHistoryEntry *newPaymentEntry = [[SPIPaymentHistoryEntry alloc] init];
     newPaymentEntry.paymentType = [SPIBillPayment paymentTypeString:billPayment.paymentType];
     newPaymentEntry.paymentSummary = [billPayment.purchaseResponse toPaymentSummary];
-    [updatedHistoryEntries addObject:newPaymentEntry];
+    [updatedHistoryEntries addObject:newPaymentEntry.toJsonObject];
     
     NSString *updatedBillData = [SPIBillStatusResponse toBillData:[updatedHistoryEntries copy]];
     
