@@ -23,24 +23,24 @@
     NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:_billData options:0];
     NSString *decodedString = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
     NSLog(@"%@", decodedString);
-   
+    
     NSError *jsonError = nil;
-    NSData *jsonData  = [NSJSONSerialization dataWithJSONObject:decodedString options:0 error:&jsonError];
+    NSDictionary *jsonData  = [NSJSONSerialization JSONObjectWithData:decodedData options:NSJSONReadingAllowFragments error:&jsonError];
     
     if (jsonError) {
         NSLog(@"jsonError: %@", jsonError);
         return [[NSArray alloc] init];
     }
     
-    NSMutableArray * paymentHistory = [[NSMutableArray alloc] init];
-    NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&jsonError];
-    for (NSDictionary * historyValue in jsonObject.allValues.firstObject) {
+    NSMutableArray *paymentHistory = [[NSMutableArray alloc] init];
+    for (NSDictionary * historyValue in jsonData) {
         SPIPaymentHistoryEntry *historyItem = [[SPIPaymentHistoryEntry alloc] initWithDictionary:historyValue];
-        [paymentHistory addObject:historyItem];
+        [paymentHistory addObject:historyItem.toJsonObject];
     }
     
     return [paymentHistory copy];
 }
+
 
 + (NSString *)toBillData:(NSArray<SPIPaymentHistoryEntry *> *)ph {
     if (ph.count < 1) {
@@ -93,8 +93,8 @@
 
 - (NSDictionary *)toJsonObject {
     NSMutableDictionary * data = [[NSMutableDictionary alloc] init];
-    [data setObject:_paymentType forKey:@"payment_type"];
-    [data setObject:_paymentSummary forKey:@"payment_summary"];
+    [data setValue:_paymentType forKey:@"payment_type"];
+    [data setValue:_paymentSummary forKey:@"payment_summary"];
     return data;
 }
 
@@ -113,7 +113,7 @@
     _billId = [_incomingAdvice getDataStringValue:@"bill_id"];
     _tableId = [_incomingAdvice getDataStringValue:@"table_id"];
     _operatorId = [_incomingAdvice getDataStringValue:@"operator_id"];
-  
+    
     
     NSString *paymentType = [_incomingAdvice getDataStringValue:@"payment_type"];
     if ([paymentType isEqualToString:[SPIBillPayment paymentTypeString:SPIPaymentTypeCard]]) {
@@ -167,7 +167,7 @@
 + (SPIMessage *)featureDisableMessage:(NSString *)messageId {
     NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
     [data setValue:@false forKey:@"pay_at_table_enabled"];
-
+    
     return [[SPIMessage alloc] initWithMessageId:messageId eventName:SPIPayAtTableSetTableConfigKey data:data needsEncryption:true];
 }
 
@@ -195,7 +195,7 @@
     _config.labelOperatorId = @"Operator ID";
     _config.labelPayButton = @"Pay at Table";
     _config.labelTableId = @"Table Name";
-
+    
     return self;
 }
 
@@ -226,6 +226,7 @@
         SPILog(@"Could not retrieve Bill Status for Payment Advice. Sending Error to Eftpos.");
         [_spi send:[existingBillStatus toMessage:message.mid]];
     }
+    
     NSArray *existingHistory = existingBillStatus.getBillPaymentHistory;
     for (SPIPaymentHistoryEntry *response in existingHistory) {
         if ([response.getTerminalRefId isEqualToString:billPayment.purchaseResponse.getTerminalReferenceId]) {
@@ -237,14 +238,17 @@
             return;
         }
     }
+    
     // Let's add the new entry to the history
-    NSMutableArray<SPIPaymentHistoryEntry*> *updatedHistoryEntries = [[NSMutableArray alloc] initWithArray:existingHistory];
+    NSMutableArray<SPIPaymentHistoryEntry*> *updatedHistoryEntries = [[NSMutableArray alloc] init];
+    [updatedHistoryEntries addObjectsFromArray:existingHistory];
     SPIPaymentHistoryEntry *newPaymentEntry = [[SPIPaymentHistoryEntry alloc] init];
     newPaymentEntry.paymentType = [SPIBillPayment paymentTypeString:billPayment.paymentType];
     newPaymentEntry.paymentSummary = [billPayment.purchaseResponse toPaymentSummary];
-    [updatedHistoryEntries addObject:newPaymentEntry.toJsonObject];
+    NSArray *newHistoryEntry = [NSArray arrayWithObjects:newPaymentEntry.toJsonObject, nil];
+    [updatedHistoryEntries addObjectsFromArray:newHistoryEntry];
     
-    NSString *updatedBillData = [SPIBillStatusResponse toBillData:[updatedHistoryEntries copy]];
+    NSString *updatedBillData = [SPIBillStatusResponse toBillData:updatedHistoryEntries];
     
     // Advise POS of new payment against this bill, and the updated BillData to Save.
     SPIBillStatusResponse *updatedBillStatus = [_delegate payAtTableBillPaymentReceived:billPayment updatedBillData:updatedBillData];
