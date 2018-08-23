@@ -35,7 +35,7 @@
     NSMutableArray *paymentHistory = [[NSMutableArray alloc] init];
     for (NSDictionary * historyValue in jsonData) {
         SPIPaymentHistoryEntry *historyItem = [[SPIPaymentHistoryEntry alloc] initWithDictionary:historyValue];
-        [paymentHistory addObject:historyItem.toJsonObject];
+        [paymentHistory addObject:historyItem];
     }
     
     return [paymentHistory copy];
@@ -65,7 +65,13 @@
     if (_result == BillRetrievalResultSuccess) {
         [data setValue:[NSNumber numberWithInteger:_totalAmount] forKey:@"bill_total_amount"];
         [data setValue:[NSNumber numberWithInteger:_outstandingAmount] forKey:@"bill_outstanding_amount"];
-        [data setObject:[self getBillPaymentHistory] forKey:@"bill_payment_history"];
+        
+        NSMutableArray<SPIPaymentHistoryEntry*> *existingHistoryJson = [[NSMutableArray alloc] init];
+        for (SPIPaymentHistoryEntry *response in self.getBillPaymentHistory) {
+            [existingHistoryJson addObjectsFromArray:[NSArray arrayWithObject:response.toJsonObject]];
+        }
+        
+        [data setObject:existingHistoryJson forKey:@"bill_payment_history"];
     } else {
         [data setValue:[NSNumber numberWithInt:_result].stringValue forKey:@"error_reason" ];
         [data setValue:[NSNumber numberWithInt:_result].stringValue forKey:@"error_detail"];
@@ -227,8 +233,9 @@
         [_spi send:[existingBillStatus toMessage:message.mid]];
     }
     
-    NSArray *existingHistory = existingBillStatus.getBillPaymentHistory;
-    for (SPIPaymentHistoryEntry *response in existingHistory) {
+    // Let's add the new entry to the history
+    NSMutableArray<SPIPaymentHistoryEntry*> *updatedHistoryEntries = [[NSMutableArray alloc] init];
+    for (SPIPaymentHistoryEntry *response in existingBillStatus.getBillPaymentHistory) {
         if ([response.getTerminalRefId isEqualToString:billPayment.purchaseResponse.getTerminalReferenceId]) {
             // We have already processed this payment
             // Perhaps EFTPOS did get our acknowledgement.
@@ -237,16 +244,13 @@
             [_spi send:[existingBillStatus toMessage:message.mid]];
             return;
         }
+        [updatedHistoryEntries addObjectsFromArray:[NSArray arrayWithObject:response.toJsonObject]];
     }
     
-    // Let's add the new entry to the history
-    NSMutableArray<SPIPaymentHistoryEntry*> *updatedHistoryEntries = [[NSMutableArray alloc] init];
-    [updatedHistoryEntries addObjectsFromArray:existingHistory];
     SPIPaymentHistoryEntry *newPaymentEntry = [[SPIPaymentHistoryEntry alloc] init];
     newPaymentEntry.paymentType = [SPIBillPayment paymentTypeString:billPayment.paymentType];
     newPaymentEntry.paymentSummary = [billPayment.purchaseResponse toPaymentSummary];
-    NSArray *newHistoryEntry = [NSArray arrayWithObjects:newPaymentEntry.toJsonObject, nil];
-    [updatedHistoryEntries addObjectsFromArray:newHistoryEntry];
+    [updatedHistoryEntries addObjectsFromArray:[NSArray arrayWithObject:newPaymentEntry.toJsonObject]];
     
     NSString *updatedBillData = [SPIBillStatusResponse toBillData:updatedHistoryEntries];
     
