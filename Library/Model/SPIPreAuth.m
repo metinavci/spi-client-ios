@@ -21,11 +21,11 @@ NSString *const SPIPreauthTopupResponseKey = @"preauth_topup_response";
 NSString *const SPIPreauthExtendRequestKey = @"preauth_extend";
 NSString *const SPIPreauthExtendResponseKey = @"preauth_extend_response";
 NSString *const SPIPreauthPartialCancellationRequestKey = @"preauth_partial_cancellation";
-NSString *const SPIPreauthPartialCancellationResponseKey = @"preauthpartial_cancellation_response";
+NSString *const SPIPreauthPartialCancellationResponseKey = @"preauth_partial_cancellation_response";
 NSString *const SPIPreauthCancellationRequestKey = @"preauth_cancellation";
 NSString *const SPIPreauthCancellationResponseKey = @"preauth_cancellation_response";
-NSString *const SPIPreauthCompleteRequestKey = @"preauth_completion";
-NSString *const SPIPreauthCompleteResponseKey = @"preauth_completion_response";
+NSString *const SPIPreauthCompleteRequestKey = @"completion";
+NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
 
 @interface SPIPreAuth () <SPIDelegate> {
     dispatch_queue_t _queue;
