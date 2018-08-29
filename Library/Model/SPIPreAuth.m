@@ -426,7 +426,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     [data setValue:_preauthId forKey:@"preauth_id"];
     [data setValue:[NSNumber numberWithInteger:_partialCancellationAmount] forKey:@"preauth_cancel_amount"];
     
-    return [[SPIMessage alloc] initWithMessageId:[SPIRequestIdHelper idForString:@"prtu"]
+    return [[SPIMessage alloc] initWithMessageId:[SPIRequestIdHelper idForString:@"prpc"]
                                        eventName:SPIPreauthPartialCancellationRequestKey
                                             data:data
                                  needsEncryption:true];
@@ -481,7 +481,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     [data setValue:_preauthId forKey:@"preauth_id"];
     
     return [[SPIMessage alloc] initWithMessageId:[SPIRequestIdHelper idForString:@"prac"]
-                                       eventName:SPIPreauthExtendRequestKey
+                                       eventName:SPIPreauthCancellationRequestKey
                                             data:data
                                  needsEncryption:true];
 }
