@@ -89,18 +89,13 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     
     SPIMessage *preauthMsg = [preauthRequest toMessage];
     
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-    NSNumber *number = [NSNumber numberWithInteger:amountCents/100];
-    NSString *amountCentsString = [formatter stringFromNumber:number];
-    
     SPITransactionFlowState *tfs = [[SPITransactionFlowState alloc] initWithTid:posRefId
                                                                            type:SPITransactionTypePreAuth
                                                                     amountCents:amountCents
                                                                         message:preauthMsg
-                                                                            msg:((void)(@"Waiting for EFTPOS connection to make preauth request for %@"), amountCentsString)];
+                                                                            msg:[NSString stringWithFormat:@"Waiting for EFTPOS connection to make preauth request for %.2f", ((float)amountCents / 100.0)]];
     
-    NSString *message = ((void)(@"Asked EFTPOS to create preauth for %@"), amountCentsString);
+    NSString *message = [NSString stringWithFormat:@"Asked EFTPOS to create preauth for %.2f", ((float)amountCents / 100.0)];
     [self _initiatePreauthTx:tfs message:message completion:completion];
 }
 
@@ -113,18 +108,13 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     
     SPIMessage *preauthMsg = [preauthRequest toMessage];
     
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-    NSNumber *number = [NSNumber numberWithInteger:amountCents/100];
-    NSString *amountCentsString = [formatter stringFromNumber:number];
-    
     SPITransactionFlowState *tfs = [[SPITransactionFlowState alloc] initWithTid:posRefId
                                                                            type:SPITransactionTypePreAuth
                                                                     amountCents:amountCents
                                                                         message:preauthMsg
-                                                                            msg:((void)(@"Waiting for EFTPOS connection to make preauth topup request for %@"), amountCentsString)];
+                                                                            msg:[NSString stringWithFormat:@"Waiting for EFTPOS connection to make preauth topup request for %.2f", ((float)amountCents / 100.0)]];
     
-    NSString *message = ((void)(@"Asked EFTPOS to make preauth request topup for %@"), amountCentsString);
+    NSString *message = [NSString stringWithFormat:@"Asked EFTPOS to make preauth request topup for %.2f", ((float)amountCents / 100.0)];
     [self _initiatePreauthTx:tfs message:message completion:completion];
 }
 
@@ -136,18 +126,13 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     
     SPIMessage *preauthMsg = [preauthRequest toMessage];
     
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-    NSNumber *number = [NSNumber numberWithInteger:amountCents/100];
-    NSString *amountCentsString = [formatter stringFromNumber:number];
-    
     SPITransactionFlowState *tfs = [[SPITransactionFlowState alloc] initWithTid:posRefId
                                                                            type:SPITransactionTypePreAuth
                                                                     amountCents:amountCents
                                                                         message:preauthMsg
-                                                                            msg:((void)(@"Waiting for EFTPOS connection to make preauth partial cancellation request for %@"), amountCentsString)];
+                                                                            msg:[NSString stringWithFormat:@"Waiting for EFTPOS connection to make preauth partial cancellation request for %.2f", ((float)amountCents / 100.0)]];
     
-    NSString *message = ((void)(@"Asked EFTPOS to make preauth partial cancellation for %@"), amountCentsString);
+    NSString *message = [NSString stringWithFormat:@"Asked EFTPOS to make preauth partial cancellation for %.2f", ((float)amountCents / 100.0)];
     [self _initiatePreauthTx:tfs message:message completion:completion];
 }
 
@@ -176,18 +161,13 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     
     SPIMessage *preauthMsg = [preauthRequest toMessage];
     
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-    NSNumber *number = [NSNumber numberWithInteger:amountCents/100];
-    NSString *amountCentsString = [formatter stringFromNumber:number];
-    
     SPITransactionFlowState *tfs = [[SPITransactionFlowState alloc] initWithTid:posRefId
                                                                            type:SPITransactionTypePreAuth
                                                                     amountCents:amountCents
                                                                         message:preauthMsg
-                                                                            msg:((void)(@"Waiting for EFTPOS connection to make preauth completion request for %@"), amountCentsString)];
+                                                                            msg:[NSString stringWithFormat:@"Waiting for EFTPOS connection to make preauth completion request for %.2f", ((float)amountCents / 100.0)]];
     
-    NSString *message = ((void)(@"Asked EFTPOS to make preauth completion for %@"), amountCentsString);
+    NSString *message = [NSString stringWithFormat:@"Asked EFTPOS to make preauth completion for %.2f", ((float)amountCents / 100.0)];
     [self _initiatePreauthTx:tfs message:message completion:completion];
 }
 
