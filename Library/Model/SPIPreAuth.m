@@ -293,6 +293,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     self = [super init];
     
     if (self) {
+        _config = [[SPIConfig alloc] init];
         _posRefId = posRefId;
     }
     
@@ -335,6 +336,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     self = [super init];
     
     if (self) {
+        _config = [[SPIConfig alloc] init];
         _posRefId = posRefId;
         _preauthAmount = amountCents;
     }
@@ -364,6 +366,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     self = [super init];
     
     if (self) {
+        _config = [[SPIConfig alloc] init];
         _preauthId = preauthID;
         _topupAmount = topupAmount;
         _posRefId = posRefId;
@@ -395,6 +398,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     self = [super init];
     
     if (self) {
+        _config = [[SPIConfig alloc] init];
         _preauthId = preauthID;
         _partialCancellationAmount = partialCancellationAmount;
         _posRefId = posRefId;
@@ -425,6 +429,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     self = [super init];
     
     if (self) {
+        _config = [[SPIConfig alloc] init];
         _preauthId = preauthID;
         _posRefId = posRefId;
     }
@@ -453,6 +458,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     self = [super init];
     
     if (self) {
+        _config = [[SPIConfig alloc] init];
         _preauthId = preauthID;
         _posRefId = posRefId;
     }
@@ -482,6 +488,7 @@ NSString *const SPIPreauthCompleteResponseKey = @"completion_response";
     self = [super init];
     
     if (self) {
+        _config = [[SPIConfig alloc] init];
         _preauthId = preauthID;
         _completionAmount = completionAmount;
         _posRefId = posRefId;
