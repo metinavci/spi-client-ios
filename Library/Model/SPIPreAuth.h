@@ -74,6 +74,7 @@ typedef void (^SPICompletionTxResult)(SPIInitiateTxResult *result);
 @interface SPIAccountVerifyRequest : NSObject
 
 @property (nonatomic, readonly, copy) NSString *posRefId;
+@property (nonatomic, retain) SPIConfig *config;
 
 - (instancetype)initWithPosRefId:(NSString *)posRefId;
 
@@ -95,6 +96,7 @@ typedef void (^SPICompletionTxResult)(SPIInitiateTxResult *result);
 
 @property (nonatomic, readonly, copy) NSString *posRefId;
 @property (nonatomic, readonly) NSInteger preauthAmount;
+@property (nonatomic, retain) SPIConfig *config;
 
 - (instancetype)initWithAmountCents:(NSInteger)amountCents posRefId:(NSString *)posRefId;
 
@@ -107,6 +109,7 @@ typedef void (^SPICompletionTxResult)(SPIInitiateTxResult *result);
 @property (nonatomic, readonly, copy) NSString *preauthId;
 @property (nonatomic, readonly, copy) NSString *posRefId;
 @property (nonatomic, readonly) NSInteger topupAmount;
+@property (nonatomic, retain) SPIConfig *config;
 
 - (instancetype)initWithPreauthID:(NSString *)preauthID topupAmount:(NSInteger)topupAmount posRefId:(NSString *)posRefId;
 
@@ -119,6 +122,7 @@ typedef void (^SPICompletionTxResult)(SPIInitiateTxResult *result);
 @property (nonatomic, readonly, copy) NSString *preauthId;
 @property (nonatomic, readonly, copy) NSString *posRefId;
 @property (nonatomic, readonly) NSInteger partialCancellationAmount;
+@property (nonatomic, retain) SPIConfig *config;
 
 - (instancetype)initWithPreauthID:(NSString *)preauthID partialCancellationAmount:(NSInteger)partialCancellationAmount posRefId:(NSString *)posRefId;
 
@@ -130,6 +134,7 @@ typedef void (^SPICompletionTxResult)(SPIInitiateTxResult *result);
 
 @property (nonatomic, readonly, copy) NSString *preauthId;
 @property (nonatomic, readonly, copy) NSString *posRefId;
+@property (nonatomic, retain) SPIConfig *config;
 
 - (instancetype)initWithPreauthID:(NSString *)preauthID posRefId:(NSString *)posRefId;
 
@@ -141,6 +146,7 @@ typedef void (^SPICompletionTxResult)(SPIInitiateTxResult *result);
 
 @property (nonatomic, readonly, copy) NSString *preauthId;
 @property (nonatomic, readonly, copy) NSString *posRefId;
+@property (nonatomic, retain) SPIConfig *config;
 
 - (instancetype)initWithPreauthID:(NSString *)preauthID posRefId:(NSString *)posRefId;
 
@@ -153,6 +159,7 @@ typedef void (^SPICompletionTxResult)(SPIInitiateTxResult *result);
 @property (nonatomic, readonly, copy) NSString *preauthId;
 @property (nonatomic, readonly, copy) NSString *posRefId;
 @property (nonatomic, readonly) NSInteger completionAmount;
+@property (nonatomic, retain) SPIConfig *config;
 
 - (instancetype)initWithPreauthID:(NSString *)preauthID completionAmount:(NSInteger)completionAmount posRefId:(NSString *)posRefId;
 
