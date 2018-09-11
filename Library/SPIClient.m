@@ -274,13 +274,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     if (_state.flow != SPIFlowPairing || _state.pairingFlowState.isFinished) return;
     
     if (_state.pairingFlowState.isAwaitingCheckFromPos && !_state.pairingFlowState.isAwaitingCheckFromEftpos) {
-        SPIMessage *message = [[[SPIDropKeysRequest alloc] init] toMessage];
-        
-        __weak __typeof(& *self) weakSelf = self;
-        
-        dispatch_async(self.queue, ^{
-            [weakSelf send:message];
-        });
+        [self send:[[[SPIDropKeysRequest alloc] init] toMessage]];
     }
     
     [self onPairingFailed];
@@ -431,7 +425,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     dispatch_async(self.queue, ^{
         @synchronized(weakSelf.txLock) {
             if (weakSelf.state.flow != SPIFlowTransaction || weakSelf.state.txFlowState.isFinished || !weakSelf.state.txFlowState.isAwaitingSignatureCheck) {
-                SPILog(@"Asked to accept signature but I was not waiting for one.");
+                SPILog(@"ERROR: Asked to accept signature but I was not waiting for one.");
                 return;
             }
             
@@ -547,7 +541,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     dispatch_async(self.queue, ^{
         @synchronized(weakSelf.txLock) {
             if (weakSelf.state.flow != SPIFlowTransaction || weakSelf.state.txFlowState.isFinished || !weakSelf.state.txFlowState.isAwaitingPhoneForAuth) {
-                SPILog(@"Asked to send auth code but I was not waiting for one");
+                SPILog(@"ERROR: Asked to send auth code but I was not waiting for one");
                 completion([[SPISubmitAuthCodeResult alloc] initWithValidFormat:false msg:@"Was not waiting for one"]);
                 return;
             }
@@ -572,7 +566,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     dispatch_async(self.queue, ^{
         @synchronized(weakSelf.txLock) {
             if (weakSelf.state.flow != SPIFlowTransaction || weakSelf.state.txFlowState.isFinished) {
-                SPILog(@"Asked to cancel transaction but I was not in the middle of one");
+                SPILog(@"ERROR: Asked to cancel transaction but I was not in the middle of one");
                 return;
             }
             
@@ -775,7 +769,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
  * SPIKeyCheckKey
  */
 - (void)connect {
-    NSLog(@"connecting %@ %@", self.posId, self.eftposAddress);
+    SPILog(@"Connecting: %@, %@", self.posId, self.eftposAddress);
     
     if (!self.secrets) {
         SPILog(@"Select the \"Pair with POS\" option on the EFTPOS terminal screen. Once selected, the EFTPOS terminal screen should read \"Start POS Pairing\"");
@@ -787,7 +781,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
 }
 
 - (void)disconnect {
-    NSLog(@"disconnect");
+    SPILog(@"Disconnecting");
     [self.connection disconnect];
 }
 
@@ -795,11 +789,11 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     NSString *json = [message toJson:self.spiMessageStamp];
     
     if (self.connection.isConnected) {
-        SPILog(@"Sending: %@", message.decryptedJson);
+        SPILog(@"Sending message: %@", message.decryptedJson);
         [self.connection send:json];
         return YES;
     } else {
-        SPILog(@"Asked to send, but not connected: %@", message.decryptedJson);
+        SPILog(@"ERROR: Asked to send, but not connected: %@", message.decryptedJson);
         return NO;
     }
 }
@@ -859,7 +853,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     
     if (pairResponse.isSuccess) {
         if (self.state.pairingFlowState.isAwaitingCheckFromPos) {
-            SPILog(@"Got Pair Confirm from Eftpos, but still waiting for use to confirm from POS.");
+            SPILog(@"Got pair confirm from EFTPOS, but still waiting for use to confirm from POS.");
             // Still Waiting for User to say yes on POS
             self.state.pairingFlowState.message = [NSString stringWithFormat:@"Confirm that the following Code:\n\n%@\n\n is what the EFTPOS showed",
                                                    self.state.pairingFlowState.confirmationCode];
@@ -953,7 +947,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     @synchronized(self.txLock) {
         NSString *incomingPosRefId = [m getDataStringValue:@"pos_ref_id"];
         if (self.state.flow != SPIFlowTransaction || self.state.txFlowState.isFinished || ![self.state.txFlowState.posRefId isEqualToString:incomingPosRefId]) {
-            SPILog(@"Received signature required but I was not waiting for one. %@", m.decryptedJson);
+            SPILog(@"ERROR: Received signature required but I was not waiting for one. %@", m.decryptedJson);
             return;
         }
         
@@ -969,7 +963,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     @synchronized(self.txLock) {
         NSString *incomingPosRefId = [m getDataStringValue:@"pos_ref_id"];
         if (self.state.flow != SPIFlowTransaction || self.state.txFlowState.isFinished || ![self.state.txFlowState.posRefId isEqualToString:incomingPosRefId]) {
-            SPILog(@"Received Auth Code Required but I was not waiting for one. Incoming POS ref ID: %@", incomingPosRefId);
+            SPILog(@"ERROR: Received auth code required but I was not waiting for one. Incoming POS ref ID: %@", incomingPosRefId);
             return;
         }
         
@@ -1077,7 +1071,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     
     if (self.state.flow != SPIFlowTransaction || txState.isFinished || !posRefIdMatched) {
         NSString *trace = checkPosRefId ? [@"Incoming Pos Ref ID: " stringByAppendingString:incomingPosRefId] : m.decryptedJson;
-        SPILog(@"Received %@ response but I was not waiting for one. %@", typeName, trace);
+        SPILog(@"ERROR: Received %@ response but I was not waiting for one. %@", typeName, trace);
         return YES;
     }
     return NO;
@@ -1178,9 +1172,10 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
                     [txState completed:successState response:m msg:@"Transaction ended"];
                 }
             }
-            [self transactionFlowStateChanged];
         }
     }
+    
+    [self transactionFlowStateChanged];
 }
 
 - (SPIMessageSuccessState)gltMatch:(SPIGetLastTransactionResponse *)gltResponse
@@ -1193,7 +1188,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
 }
 
 - (SPIMessageSuccessState)gltMatch:(SPIGetLastTransactionResponse *)gltResponse posRefId:(NSString *)posRefId {
-    SPILog(@"GLT CHECK: PosRefId: %@->%@}", posRefId, [gltResponse getPosRefId]);
+    SPILog(@"GLT check: posRefId=%@->%@}", posRefId, [gltResponse getPosRefId]);
     
     if (![posRefId isEqualToString:gltResponse.getPosRefId]) {
         return SPIMessageSuccessStateUnknown;
@@ -1217,7 +1212,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
             return;
         }
         
-        SPILog(@"Failed to cancel transaction: reason=%@, detail=%@", response.getErrorReason, response.getErrorDetail);
+        SPILog(@"ERROR: Failed to cancel transaction: reason=%@, detail=%@", response.getErrorReason, response.getErrorDetail);
         NSString *msg = [NSString stringWithFormat:@"Failed to cancel transaction: %@. Check EFTPOS.", response.getErrorDetail];
         [self.state.txFlowState cancelFailed:msg];
         [self transactionFlowStateChanged];
@@ -1235,7 +1230,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
         self.hasSetPosInfo = YES;
         SPILog(@"Setting POS info successful");
     } else {
-        SPILog(@"Setting POS info failed: reason=@%, detail=%@", response.getErrorReason, response.getErrorDetail);
+        SPILog(@"ERROR: Setting POS info failed: reason=@%, detail=%@", response.getErrorReason, response.getErrorDetail);
     }
 }
 
@@ -1291,7 +1286,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
  * @param newConnectionState Connection state
  */
 - (void)onSpiConnectionStatusChanged:(SPIConnectionState)newConnectionState {
-    NSLog(@"onSpiConnectionStatusChanged %ld", (long)newConnectionState);
+    SPILog(@"Connection status changed: %ld", (long)newConnectionState);
     
     __weak __typeof(& *self) weakSelf = self;
     
@@ -1302,7 +1297,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
                 break;
                 
             case SPIConnectionStateConnected:
-                if (weakSelf.state.flow == SPIFlowPairing) {
+                if (weakSelf.state.flow == SPIFlowPairing && weakSelf.state.status == SPIStatusUnpaired) {
                     weakSelf.state.pairingFlowState.message = @"Requesting to pair...";
                     [weakSelf pairingFlowStateChanged];
                     
@@ -1336,8 +1331,8 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                         if (weakSelf.connection == nil) return;
                         
-                        SPILog(@"Will try to reconnect in 5s...");
-                        sleep(5);
+                        SPILog(@"Will try to reconnect in 3s...");
+                        sleep(3);
                         
                         if (weakSelf.state.status != SPIStatusUnpaired) {
                             [weakSelf.connection connect];
@@ -1410,7 +1405,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
  * we received the first Login Response from the PIN pad.
  */
 - (void)onReadyToTransact {
-    NSLog(@"onReadyToTransact %lu, %d", (unsigned long)self.state.flow, (int)!self.state.txFlowState.isFinished);
+    SPILog(@"Ready to transact: %lu, %d", (unsigned long)self.state.flow, (int)!self.state.txFlowState.isFinished);
     
     // So, we have just made a connection, pinged and logged in successfully.
     self.state.status = SPIStatusPairedConnected;
@@ -1444,7 +1439,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
                 
                 [weakSelf.spiPat pushPayAtTableConfig];
             });
-            SPILog(@"onReadyToTransact, we were NOT in the middle of a transaction. nothing to do.");
+            SPILog(@"Ready to transact and NOT in the middle of a transaction. Nothing to do.");
         }
     }
 }
@@ -1494,7 +1489,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
     }
     
     self.mostRecentPongReceived = m;
-    SPILog(@"PongLatency:%i", [NSDate date].timeIntervalSince1970 - _mostRecentPingSentTime);
+    SPILog(@"Pong latency: %i", [NSDate date].timeIntervalSince1970 - _mostRecentPingSentTime);
 }
 
 /**
@@ -1541,7 +1536,7 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
         
         NSString *eventName = m.eventName;
         
-        NSLog(@"Received: %@", m.decryptedJson);
+        SPILog(@"Message received: %@", m.decryptedJson);
         
         if ([self.spiPreauth isPreauthEvent:eventName]) {
             [self.spiPreauth _handlePreauthMessage:m];
@@ -1620,18 +1615,18 @@ static NSInteger missedPongsToDisconnect = 2; // How many missed pongs before di
             SPILog(@"I could not verify message from EFTPOS. You might have to un-pair EFTPOS and then reconnect.");
             
         } else if ([eventName isEqualToString:SPIEventError]) {
-            SPILog(@"ERROR!!: '%@', %@", eventName, m.data);
+            SPILog(@"ERROR: '%@', %@", eventName, m.data);
             [weakSelf handleErrorEvent:m];
             
         } else {
-            SPILog(@"I don't understand event:'%@', %@. Perhaps I have not implemented it yet.", eventName, m.data);
+            SPILog(@"ERROR: I don't understand event: '%@', %@. Perhaps I have not implemented it yet.", eventName, m.data);
         }
     });
 }
 
 - (void)didReceiveError:(NSError *)error {
     dispatch_async(self.queue, ^{
-        SPILog(@"Received WS error: %@", error);
+        SPILog(@"ERROR: Received WS error: %@", error);
     });
 }
 

@@ -1,0 +1,10 @@
+language: objective-c
+xcode_workspace: SPIClient-iOS.xcworkspace
+xcode_scheme: SPIClient-iOS
+xcode_destination: platform=iOS Simulator,OS=11.4,name=iPhone 8
+
+deploy:
+- provider: script
+  script: set -o pipefail && ./deploy-check.sh $TRAVIS_TAG && pod trunk push SPIClient-iOS.podspec --allow-warnings
+  on:
+    tags: true

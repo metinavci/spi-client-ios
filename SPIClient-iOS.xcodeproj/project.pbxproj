@@ -558,8 +558,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 27BEE98E2058F9C400E74E66 /* Build configuration list for PBXNativeTarget "SPIClient-iOS" */;
 			buildPhases = (
-				27B3CD0E20EA198300237C3A /* Update Manifest Header */,
 				C175C2944CEDB6EA6FD46B27 /* [CP] Check Pods Manifest.lock */,
+				27B3CD0E20EA198300237C3A /* Update Manifest Header */,
 				27BEE9752058F9C400E74E66 /* Sources */,
 				27BEE9762058F9C400E74E66 /* Frameworks */,
 				27BEE9772058F9C400E74E66 /* Headers */,
