@@ -156,7 +156,7 @@
 
 - (SPIMessage *)toMessage:(NSString *)messageId {
     NSMutableDictionary *data = [[NSMutableDictionary alloc] init];
-    [data setValue:@true forKey:@"pay_at_table_enabled"];
+    [data setValue:[NSNumber numberWithBool:_payAtTableEnabled]  forKey:@"pay_at_table_enabled"];
     [data setValue:[NSNumber numberWithBool:_operatorIdEnabled] forKey:@"operator_id_enabled"];
     [data setValue:[NSNumber numberWithBool:_splitByAmountEnabled] forKey:@"split_by_amount_enabled"];
     [data setValue:[NSNumber numberWithBool:_equalSplitEnabled] forKey:@"equal_split_enabled"];
@@ -192,6 +192,7 @@
 - (instancetype)initWithClient:(SPIClient *)spi {
     _spi = spi;
     _config = [SPIPayAtTableConfig alloc];
+    _config.payAtTableEnabled = true;
     _config.operatorIdEnabled = true;
     _config.allowedOperatorIds = [NSArray array];
     _config.equalSplitEnabled = true;

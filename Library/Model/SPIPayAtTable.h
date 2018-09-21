@@ -100,6 +100,7 @@ typedef NS_ENUM(NSUInteger, SPIPaymentType) {
 
 @interface SPIPayAtTableConfig : NSObject
 
+@property (nonatomic) BOOL payAtTableEnabled;
 @property (nonatomic) BOOL operatorIdEnabled;
 @property (nonatomic) BOOL splitByAmountEnabled;
 @property (nonatomic) BOOL equalSplitEnabled;
