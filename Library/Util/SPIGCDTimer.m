@@ -69,9 +69,7 @@
 }
 
 - (void)cancel {
-    [self performWhileLocked:^{
-        [self _cancel];
-    }];
+    [self _cancel];
 }
 
 @end
