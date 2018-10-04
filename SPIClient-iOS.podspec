@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SPIClient-iOS'
-  s.version      = '2.3.8'
+  s.version      = '2.3.10'
   s.summary      = 'SPI Client iOS'
   s.authors      = [ 'Yoo-Jin Lee', 'Mike Gouline', 'Amir Kamali', 'Metin Avci' ]
   s.license      = { :type => 'Apache License, Version 2.0' }
@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Library/**/*.{h,m,c}'
   s.requires_arc = true
   s.platform     = :ios, '8.0'
-  
+
   s.dependency 'RNCryptor-objc'
   s.dependency 'SocketRocket'
 end
